@@ -3,6 +3,8 @@ package ua.procamp.streams.stream;
 import ua.procamp.streams.function.*;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsIntStream implements IntStream {
@@ -16,10 +18,14 @@ public class AsIntStream implements IntStream {
     }
 
     public static IntStream of(int... values) {
+        return of(true, values);
+    }
+
+    private static AsIntStream of(boolean needToExtendArray, int... values) {
         AsIntStream asIntStream = new AsIntStream();
         asIntStream.intIterator = asIntStream.new DefaultIntStreamIterator();
-        asIntStream.values = asIntStream.initExtendedArray(values);
         asIntStream.workLength = values.length;
+        asIntStream.values = needToExtendArray ? asIntStream.initExtendedArray(values) : values;
         return asIntStream;
     }
 
@@ -90,10 +96,18 @@ public class AsIntStream implements IntStream {
 
     @Override
     public IntStream flatMap(IntToIntStreamFunction func) {
-        for (int integer : this.toArray()) {
-            func.applyAsIntStream(integer).forEach(intIterator::add);
+        List<Integer> valueList = new LinkedList<>();
+        IntStream intStream;
+        int integer;
+        while (intIterator.moveToNext()) {
+            integer = intIterator.getCurrentInt();
+            intStream = func.applyAsIntStream(integer);
+            intStream.forEach(valueList::add);
         }
-        return this;
+        int[] valuesAfterMap = valueList.stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
+        return AsIntStream.of(valuesAfterMap);
     }
 
     @Override
@@ -116,7 +130,7 @@ public class AsIntStream implements IntStream {
 
         public boolean moveToNext() {
             ++currentInd;
-            this.isFinished = currentInd >= values.length;
+            this.isFinished = currentInd >= workLength;
             return !this.isFinished;
         }
 
@@ -138,13 +152,12 @@ public class AsIntStream implements IntStream {
 
         @Override
         public void add(int element) {
-            int currentIndex = this.getCurrentIndex();
             if (workLength >= values.length) {
-                workLength = values.length +1;
+                workLength = values.length;
                 values = initExtendedArray(values);
             }
             values[workLength] = element;
-            workLength++;
+            ++workLength;
         }
     }
 
@@ -153,4 +166,24 @@ public class AsIntStream implements IntStream {
         return newArray;
     }
 
+    /**
+     * todo
+     * implement method to copy Stream. Method copy values and set new iterator wrapper
+     */
+    private IntStream createIntStream(int[] values, int startIndex, int finishIndex, IntIterator intIterator) {
+        values = Arrays.copyOfRange(values, startIndex, finishIndex);
+        AsIntStream intStream = AsIntStream.of(false, values);
+        intStream.intIterator = intIterator;
+        intStream.intIterator.setCurrentIndex(-1);
+        return intStream;
+    }
+
+    private int[] add(int[] values, int element, int workLength) {
+        if (workLength >= values.length) {
+            workLength = values.length;
+            values = initExtendedArray(values);
+        }
+        values[workLength] = element;
+        return values;
+    }
 }
