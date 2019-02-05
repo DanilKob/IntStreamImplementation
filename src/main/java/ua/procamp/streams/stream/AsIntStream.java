@@ -14,6 +14,7 @@ public class AsIntStream implements IntStream {
     private IntIterator intIterator;
 
     private AsIntStream() {
+
     }
 
     public static IntStream of(int... values) {
@@ -147,7 +148,13 @@ public class AsIntStream implements IntStream {
 
     @Override
     public int[] toArray() {
-        return Arrays.copyOfRange(values, 0, workLength);
+        List<Integer> valueList = new LinkedList<>();
+        int integer;
+        while (intIterator.moveToNext()) {
+            integer = intIterator.getCurrentInt();
+            valueList.add(integer);
+        }
+        return this.integerListToArray(valueList);
     }
 
     private void setIterator(IntIterator intIterator) {
