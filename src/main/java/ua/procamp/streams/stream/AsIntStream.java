@@ -137,7 +137,13 @@ public class AsIntStream implements IntStream {
 
     @Override
     public int reduce(int identity, IntBinaryOperator op) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int right;
+        int left = identity;
+        while (intIterator.moveToNext()) {
+            right = intIterator.getCurrentInt();
+            left = op.apply(left, right);
+        }
+        return left;
     }
 
     @Override
