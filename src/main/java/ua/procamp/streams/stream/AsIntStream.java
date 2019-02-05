@@ -18,7 +18,7 @@ public class AsIntStream implements IntStream {
     public static IntStream of(int... values) {
         AsIntStream asIntStream = new AsIntStream();
         asIntStream.intIterator = asIntStream.new DefaultIntStreamIterator();
-        asIntStream.values = asIntStream.initArray(values);
+        asIntStream.values = asIntStream.initExtendedArray(values);
         asIntStream.workLength = values.length;
         return asIntStream;
     }
@@ -90,7 +90,10 @@ public class AsIntStream implements IntStream {
 
     @Override
     public IntStream flatMap(IntToIntStreamFunction func) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        for (int integer : this.toArray()) {
+            func.applyAsIntStream(integer).forEach(intIterator::add);
+        }
+        return this;
     }
 
     @Override
@@ -136,15 +139,16 @@ public class AsIntStream implements IntStream {
         @Override
         public void add(int element) {
             int currentIndex = this.getCurrentIndex();
-            if (currentIndex < values.length) {
+            if (workLength >= values.length) {
                 workLength = values.length +1;
-                values = initArray(values);
+                values = initExtendedArray(values);
             }
             values[workLength] = element;
+            workLength++;
         }
     }
 
-    private int[] initArray(int[] oldValues) {
+    private int[] initExtendedArray(int[] oldValues) {
         int[] newArray = Arrays.copyOf(oldValues, (int) (oldValues.length * 1.5) + 1);
         return newArray;
     }
