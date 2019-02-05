@@ -37,7 +37,7 @@ public class AsIntStream implements IntStream {
             ++count;
         }
 
-        return count == 0 ? sum : sum/count;
+        return count == 0 ? sum : sum / count;
     }
 
     @Override
@@ -128,9 +128,9 @@ public class AsIntStream implements IntStream {
             intStream = func.applyAsIntStream(integer);
             intStream.forEach(valueList::add);
         }
-        int[] valuesAfterMap = valueList.stream()
-                .mapToInt(Integer::intValue)
-                .toArray();
+
+        int[] valuesAfterMap = integerListToArray(valueList);
+
         return AsIntStream.of(valuesAfterMap);
     }
 
@@ -164,18 +164,22 @@ public class AsIntStream implements IntStream {
             this.isFinished = currentInd >= workLength;
             return !this.isFinished;
         }
+
         @Override
         public int getCurrentInt() {
             return values[currentInd];
         }
+
         @Override
         public int getCurrentIndex() {
             return currentInd;
         }
+
         @Override
         public void setCurrentIndex(int currentIndex) {
             this.currentInd = currentIndex;
         }
+
         @Override
         public boolean isFinished() {
             return this.isFinished;
@@ -195,5 +199,14 @@ public class AsIntStream implements IntStream {
     private int[] initExtendedArray(int[] oldValues) {
         int[] newArray = Arrays.copyOf(oldValues, (int) (oldValues.length * 1.5) + 1);
         return newArray;
+    }
+
+    private int[] integerListToArray(List<Integer> valueList) {
+        int[] valuesAfterMap = new int[valueList.size()];
+        int index = -1;
+        for (Integer integ : valueList) {
+            valuesAfterMap[++index] = integ;
+        }
+        return valuesAfterMap;
     }
 }
