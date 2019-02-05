@@ -14,7 +14,6 @@ public class AsIntStream implements IntStream {
     private IntIterator intIterator;
 
     private AsIntStream() {
-        // To Do
     }
 
     public static IntStream of(int... values) {
@@ -159,24 +158,25 @@ public class AsIntStream implements IntStream {
         private int currentInd = -1;
         private boolean isFinished = true;
 
+        @Override
         public boolean moveToNext() {
             ++currentInd;
             this.isFinished = currentInd >= workLength;
             return !this.isFinished;
         }
-
+        @Override
         public int getCurrentInt() {
             return values[currentInd];
         }
-
+        @Override
         public int getCurrentIndex() {
             return currentInd;
         }
-
+        @Override
         public void setCurrentIndex(int currentIndex) {
             this.currentInd = currentIndex;
         }
-
+        @Override
         public boolean isFinished() {
             return this.isFinished;
         }
@@ -195,26 +195,5 @@ public class AsIntStream implements IntStream {
     private int[] initExtendedArray(int[] oldValues) {
         int[] newArray = Arrays.copyOf(oldValues, (int) (oldValues.length * 1.5) + 1);
         return newArray;
-    }
-
-    /**
-     * todo
-     * implement method to copy Stream. Method copy values and set new iterator wrapper
-     */
-    private IntStream createIntStream(int[] values, int startIndex, int finishIndex, IntIterator intIterator) {
-        values = Arrays.copyOfRange(values, startIndex, finishIndex);
-        AsIntStream intStream = AsIntStream.of(false, values);
-        intStream.intIterator = intIterator;
-        intStream.intIterator.setCurrentIndex(-1);
-        return intStream;
-    }
-
-    private int[] add(int[] values, int element, int workLength) {
-        if (workLength >= values.length) {
-            workLength = values.length;
-            values = initExtendedArray(values);
-        }
-        values[workLength] = element;
-        return values;
     }
 }
