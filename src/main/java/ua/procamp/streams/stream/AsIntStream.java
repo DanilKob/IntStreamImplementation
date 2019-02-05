@@ -40,17 +40,32 @@ public class AsIntStream implements IntStream {
 
     @Override
     public long count() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        AtomicInteger count = new AtomicInteger();
+        this.forEach(integer -> count.incrementAndGet());
+        return count.get();
     }
 
     @Override
     public Integer sum() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        AtomicInteger sum = new AtomicInteger();
+        this.forEach(sum::addAndGet);
+        return sum.get();
     }
 
     @Override
     public IntStream filter(IntPredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        IntIterator oldIterator = this.intIterator;
+        IntIterator intItr = new ProxyIntIterator(oldIterator) {
+            @Override
+            public boolean moveToNext() {
+                while (oldIterator.moveToNext() && !predicate.test(oldIterator.getCurrentInt())) {
+
+                }
+                return !this.isFinished();
+            }
+        };
+        this.setIterator(intItr);
+        return this;
     }
 
     @Override
@@ -62,7 +77,15 @@ public class AsIntStream implements IntStream {
 
     @Override
     public IntStream map(IntUnaryOperator mapper) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        IntIterator oldIterator = this.intIterator;
+        IntIterator intItr = new ProxyIntIterator(oldIterator) {
+            @Override
+            public int getCurrentInt() {
+                return mapper.apply(super.getCurrentInt());
+            }
+        };
+        this.setIterator(intItr);
+        return this;
     }
 
     @Override
