@@ -31,17 +31,42 @@ public class AsIntStream implements IntStream {
 
     @Override
     public Double average() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        double sum = 0;
+        int count = 0;
+        while (intIterator.moveToNext()) {
+            sum += intIterator.getCurrentInt();
+            ++count;
+        }
+
+        return count == 0 ? sum : sum/count;
     }
 
     @Override
     public Integer max() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int currentInt;
+        int max = Integer.MIN_VALUE;
+        while (intIterator.moveToNext()) {
+            currentInt = intIterator.getCurrentInt();
+            if (currentInt > max) {
+                max = currentInt;
+            }
+        }
+
+        return max;
     }
 
     @Override
     public Integer min() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int currentInt;
+        int min = Integer.MAX_VALUE;
+        while (intIterator.moveToNext()) {
+            currentInt = intIterator.getCurrentInt();
+            if (currentInt < min) {
+                min = currentInt;
+            }
+        }
+
+        return min;
     }
 
     @Override
